@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>2FA Setup</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 50px; text-align: center; }
+        .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px 0px #0000001a; }
+        img { margin: 20px 0; max-width: 100%; height: auto; }
+        a.button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        a.button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Set Up Two-Factor Authentication</h2>
+        <p>Please scan this QR code with your authenticator app (e.g., Google Authenticator, Authy).</p>
+        
+        <img id="qrCodeImage" src="" alt="2FA QR Code">
+        
+        <br>
+        <a href="/login" class="button">I have scanned the code. Go to Login</a>
+    </div>
+
+    <script>
+        // Extract the username from the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+
+        // Set the image source to our backend API endpoint
+        if (username) {
+            document.getElementById('qrCodeImage').src = `/api/get-qr-code/${username}`;
+        } else {
+            alert("Username is missing. Please register again.");
+        }
+    </script>
+
+</body>
+</html>

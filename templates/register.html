@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; color: #f8fafc; }
+        .card { background: #1e293b; width: 100%; max-width: 400px; padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; box-sizing: border-box; border: 1px solid #334155; }
+        h2 { color: #f8fafc; margin-top: 0; margin-bottom: 25px; font-weight: 700; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+        input, select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1.5px solid #334155; border-radius: 10px; font-size: 15px; color: #f8fafc; transition: all 0.3s ease; box-sizing: border-box; outline: none; }
+        input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        input::placeholder { color: #475569; }
+        .btn-primary { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-secondary { width: 100%; padding: 14px; background: #0f172a; color: #cbd5e1; border: 1px solid #334155; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 15px; }
+        .btn-secondary:hover { background: #334155; color: white; }
+        .divider { display: flex; align-items: center; margin: 25px 0 15px; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #334155; }
+        .divider span { padding: 0 15px; color: #64748b; font-size: 13px; }
+        #qr_setup { display: none; animation: fadeIn 0.5s ease; }
+        /* Notice: QR code stays white so mobile apps can scan it properly */
+        #qr_image { border-radius: 15px; padding: 10px; border: 2px dashed #3b82f6; margin: 15px 0; background: #ffffff; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div id="register_section">
+            <h2>Create an Account</h2>
+            <form id="registerForm">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" placeholder="e.g. Ziyad Hassan" required>
+                </div>
+                <div class="input-group">
+                    <label>Username or Email</label>
+                    <input type="text" id="username" placeholder="e.g. ziyad@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <div class="input-group">
+                    <label>Role</label>
+                    <select id="role">
+                        <option value="User">User</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Register Now</button>
+            </form>
+            
+            <div class="divider"><span>OR</span></div>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/login'">I already have an account</button>
+        </div>
+
+        <div id="qr_setup">
+            <div style="width: 60px; height: 60px; background: rgba(34, 197, 94, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border: 1px solid #22c55e;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h2 style="color: #4ade80; font-size: 22px;">Success!</h2>
+            <p style="color: #94a3b8; font-size: 14px; line-height: 1.5;">Scan this QR code with your Authenticator app (e.g., Google Authenticator). <strong>It will only be shown once.</strong></p>
+            <img id="qr_image" src="" width="180" alt="2FA QR Code">
+            <button onclick="window.location.href='/login'" class="btn-primary" style="margin-top: 15px;">Proceed to Login</button>
+        </div>
+
+        <p id="msg" style="color: #f87171; font-size: 14px; margin-top: 15px; font-weight: 600;"></p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: document.getElementById('name').value,
+                    email_or_username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                    role: document.getElementById('role').value
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('register_section').style.display = 'none';
+                document.getElementById('msg').style.display = 'none';
+                document.getElementById('qr_image').src = data.qr_url;
+                document.getElementById('qr_setup').style.display = 'block';
+            } else { 
+                document.getElementById('msg').innerText = data.error; 
+            }
+        };
+    </script>
+</body>
+</html>

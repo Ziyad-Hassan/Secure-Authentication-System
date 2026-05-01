@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; color: #f8fafc; }
+        .card { background: #1e293b; width: 100%; max-width: 400px; padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; box-sizing: border-box; border: 1px solid #334155; }
+        h2 { color: #f8fafc; margin-top: 0; margin-bottom: 25px; font-weight: 700; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+        input.standard-input { width: 100%; padding: 12px 15px; background: #0f172a; border: 1.5px solid #334155; border-radius: 10px; font-size: 15px; color: #f8fafc; transition: all 0.3s ease; box-sizing: border-box; outline: none; }
+        input.standard-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        input::placeholder { color: #475569; }
+        .btn-primary { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-secondary { width: 100%; padding: 14px; background: #0f172a; color: #cbd5e1; border: 1px solid #334155; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 15px; }
+        .btn-secondary:hover { background: #334155; color: white; }
+        .divider { display: flex; align-items: center; margin: 25px 0 15px; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #334155; }
+        .divider span { padding: 0 15px; color: #64748b; font-size: 13px; }
+        
+        #otp_section { display: none; animation: fadeIn 0.4s ease; }
+        .otp-container { display: flex; justify-content: space-between; gap: 8px; margin: 20px 0; direction: ltr; }
+        .otp-box { width: 45px; height: 55px; border: 2px solid #334155; border-radius: 12px; text-align: center; font-size: 24px; font-weight: bold; color: #f8fafc; background: #0f172a; outline: none; transition: all 0.2s ease; padding: 0; }
+        .otp-box:focus { border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); transform: translateY(-2px); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 id="form-title">Welcome Back</h2>
+        <form id="loginForm">
+            <div id="credentials">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="user" class="standard-input" placeholder="Enter your username" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="pass" class="standard-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" id="nextBtn" class="btn-primary">Sign In</button>
+            </div>
+            
+            <div id="otp_section">
+                <div style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 15px; border: 1px solid rgba(59, 130, 246, 0.2);" id="otp_msg"></div>
+                <p style="color: #94a3b8; font-size: 14px; margin-bottom: 10px;">Enter the 6-digit code from your app</p>
+                
+                <div class="otp-container">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                </div>
+                
+                <button type="submit" class="btn-primary">Verify & Access</button>
+            </div>
+        </form>
+        <p id="error_msg" style="color: #f87171; font-size: 14px; margin-top: 15px; font-weight: 600;"></p>
+
+        <div id="toggle_register">
+            <div class="divider"><span>New here?</span></div>
+            <button type="button" class="btn-secondary" onclick="window.location.href='/register'">Create an Account</button>
+        </div>
+    </div>
+
+    <script>
+        const otpInputs = document.querySelectorAll('.otp-box');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value !== '' && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                let pasteData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+                for (let i = 0; i < pasteData.length; i++) {
+                    otpInputs[i].value = pasteData[i];
+                }
+                if(pasteData.length > 0) {
+                    otpInputs[Math.min(pasteData.length - 1, 5)].focus();
+                }
+            });
+        });
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            let otpCode = '';
+            otpInputs.forEach(input => otpCode += input.value);
+
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    email_or_username: document.getElementById('user').value,
+                    password: document.getElementById('pass').value,
+                    totp_code: otpCode
+                })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                document.getElementById('error_msg').innerText = ''; 
+                
+                if (data.step === '2fa_required') {
+                    document.getElementById('form-title').innerText = 'Two-Factor Auth';
+                    document.getElementById('credentials').style.display = 'none';
+                    document.getElementById('toggle_register').style.display = 'none';
+                    document.getElementById('otp_msg').innerText = data.message;
+                    document.getElementById('otp_section').style.display = 'block';
+                    otpInputs[0].focus();
+                } else {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('uName', data.name);
+                    localStorage.setItem('uRole', data.role);
+                    window.location.href = '/dashboard';
+                }
+            } else { 
+                document.getElementById('error_msg').innerText = data.error; 
+            }
+        };
+    </script>
+</body>
+</html>
